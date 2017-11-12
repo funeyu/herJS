@@ -87,7 +87,104 @@ var parseNumber = function(string) {
 var leftParentheses = /^\s*\(\s+/g;
 var rightParentheses = /^\s+\)/g;
 
+var firstRightParentheses = /\)/g;
+
 var numberSymbols = /^\s*\d+/g
+
+var tokenReg = /^\s*\w\s+/g
+
+var parseArguments = function(codeString) {
+
+    return codeString.split(/\s+/g).filter(function(one) {
+        return one;
+    })
+
+}
+
+// 没有标识结束
+var expression = function(codeString, node) {
+
+    if(codeString.length < 1) return '';
+
+    leftParentheses.lastIndex = 0;
+    leftParentheses.exec(codeString);
+
+    if(leftParentheses.lastIndex < 1) {
+        rightParentheses.lastIndex = 0;
+
+        rightParentheses.exec(codeString);
+        if(rightParentheses.lastIndex > 0) {
+            node.rightParentheses = true;
+            return expression(codeString.substr(rightParentheses.lastIndex, codeString.length), node.getParent())
+        }
+    };
+
+
+    codeString = codeString.substr(leftParentheses.lastIndex, codeString.length);
+
+    var info = findType(codeString);
+
+    codeString = codeString.substr(info.advance, codeString.length);
+
+    if(info.advance > 0) {
+        switch (info.type) {
+            case '+' :
+                var nNode = new Node();
+                nNode.setType("+");
+                node.setParent(nNode);
+                tokenReg.lastIndex = 0;
+                tokenReg.exec(codeString)
+                var leftSymbol = codeString.substr(tokenReg.index, tokenReg.lastIndex);
+                codeString = codeString.substr(tokenReg.lastIndex, codeString.length);
+                nNode.addLeft(new Node().setType('symbol').setValue(leftSymbol));
+
+                leftParentheses.lastIndex = 0;
+                if(leftParentheses.exec(codeString)) {
+                    return expression(codeString, nNode);
+                } else {
+                    tokenReg.lastIndex = 0;
+                    if(tokenReg.exec(codeString)) {
+                        nNode.addRight(new Node().setType('symbol').setValue(codeString.substr(tokenReg.index, tokenReg.lastIndex)));
+                        return expression(codeString.substr(tokenReg.lastIndex, codeString.length), nNode);
+                    } else {
+                        throw new Error('语法错误!');
+                    }
+                }
+        }
+    }
+
+}
+
+var parseDefination = function(codeString, codeNode) {
+
+    var advance = 0;
+
+    leftParentheses.lastIndex = 0;
+
+    leftParentheses.exec(codeString);
+    advance = leftParentheses.lastIndex;
+
+    codeString = codeString.substr(leftParentheses.lastIndex, codeString.length);
+
+    var info = findType(codeString);
+    advance += info.advance;
+
+    codeNode.callName = info.type;
+    codeString = codeString.substr(info.advance, codeString.length);
+
+    firstRightParentheses.lastIndex = 0;
+    firstRightParentheses.exec(codeString);
+
+    advance += firstRightParentheses.lastIndex;
+
+    var argString = codeString.substr(firstRightParentheses.index, firstRightParentheses.lastIndex - 1);
+
+    var args = parseArguments(argString);
+
+    codeNode.arguments = args;
+
+    return advance;
+}
 
 var parse = function (codeString, parent) {
 
@@ -153,6 +250,15 @@ var parse = function (codeString, parent) {
                 }
 
             }
+
+            else if(info.type == 'define') {
+                codeString = codeString.substr(leftParentheses.lastIndex, codeString.length);
+
+                var advance = parseDefination(codeString, codeNode);
+                codeString = codeString.substr(advance, codeString.length);
+                console.log(codeString)
+
+            }
         }
 
     }
@@ -161,4 +267,5 @@ var parse = function (codeString, parent) {
 
 var root = new Node();
 var ss = "( * 4 ( * 2 3 ) )"
-parse(ss, root)
+var fn = "( define ( double x ) ( + x ( + x x ) ) )"
+parse(fn, root)
