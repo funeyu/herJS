@@ -17,6 +17,11 @@ Node.prototype.setType = function(type) {
     return this;
 }
 
+Node.prototype.isLeftEmpty = function() {
+
+    return !this.left
+}
+
 Node.prototype.setParent = function(parent) {
 
     if(!parent) return;
@@ -104,6 +109,7 @@ var parseArguments = function(codeString) {
 // 没有标识结束
 var expression = function(codeString, node) {
 
+    console.log('expression', codeString)
     if(codeString.length < 1) return '';
 
     leftParentheses.lastIndex = 0;
@@ -138,23 +144,27 @@ var expression = function(codeString, node) {
                 nNode.setParent(node);
                 tokenReg.lastIndex = 0;
                 tokenReg.exec(codeString)
-                var leftSymbol = codeString.substr(tokenReg.index, tokenReg.lastIndex);
-                codeString = codeString.substr(tokenReg.lastIndex, codeString.length);
-                nNode.addLeft(new Node().setType('symbol').setValue(leftSymbol));
+                leftParentheses.lastIndex = 0
 
-                leftParentheses.lastIndex = 0;
-                if(leftParentheses.exec(codeString)) {
+                if(tokenReg.lastIndex > 0) {
+                    var symbol = codeString.substr(tokenReg.index, tokenReg.lastIndex);
+                    codeString = codeString.substr(tokenReg.lastIndex, codeString.length);
+                    nNode.addLeft(new Node().setType('symbol').setValue(symbol));
+
+                    tokenReg.lastIndex = 0
+                    if(tokenReg.exec(codeString)) {
+                        var sym = codeString.substr(tokenReg.index, tokenReg.lastIndex);
+                        codeString = codeString.substr(tokenReg.lastIndex, codeString.length)
+                        nNode.addRight(new Node().setType('symbol').setValue(sym));
+                    }
+
+                    return expression(codeString, nNode);
+                } else if(leftParentheses.exec(codeString)) {
                     return expression(codeString, nNode);
                 } else {
-                    tokenReg.lastIndex = 0;
-                    if(tokenReg.exec(codeString)) {
-                        nNode.addRight(new Node().setType('symbol').setValue(codeString.substr(tokenReg.index, tokenReg.lastIndex)));
-                        console.log('ddd', codeString.substr(tokenReg.lastIndex, codeString.length));
-                        return expression(codeString.substr(tokenReg.lastIndex, codeString.length), nNode);
-                    } else {
-                        throw new Error('语法错误!');
-                    }
+                    throw new Error('语法错误!')
                 }
+                break;
         }
     }
 
@@ -276,4 +286,5 @@ var parse = function (codeString, parent) {
 var root = new Node();
 var ss = "( * 4 ( * 2 3 ) )"
 var fn = "( define ( double x ) ( + x ( + x x ) ) )"
-parse(fn, root)
+var ff = "( define ( double x ) ( + ( + x x ) ( + x x ) ) )"
+parse(ff, root)
