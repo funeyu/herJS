@@ -6,6 +6,33 @@ var data = [
     {regEntireId: "999999/99990003/999900033/", regId: "999900033", regName: "Sunmi测试机构", regUid: 4, upRegId: "99990003"},
 ]
 
+
+var treefy = function(data, treeData, parent) {
+    if(typeof treeData === 'undefined') {
+        treeData = []
+        parent = {regId: '999999'}
+    }
+
+    var children = data.filter(function(d) {
+        return d.upRegId === parent.regId
+    })
+    if(children.length > 0) {
+        if(parent.regId === '999999') {
+            treeData.push(children)
+        } else {
+            parent.children = []
+            parent.children.push(children)
+        }
+
+        children.forEach(function(d){
+            treefy(data, treeData, d)
+        })
+    }
+
+    return treeData
+}
+
+
 var treeData ={}
 
 var findChild = function(children, key) {
