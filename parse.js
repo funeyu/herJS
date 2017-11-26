@@ -17,6 +17,11 @@ Node.prototype.setType = function(type) {
     return this;
 }
 
+Node.prototype.isLeftEmpty = function() {
+
+    return !this.left
+}
+
 Node.prototype.setParent = function(parent) {
 
     if(!parent) return;
@@ -37,7 +42,7 @@ Node.prototype.addLeft = function(left) {
 
 Node.prototype.addRight = function(right) {
 
-    this.parent = this;
+    right.parent = this;
     this.right = right;
 }
 
@@ -85,7 +90,7 @@ var parseNumber = function(string) {
 }
 
 var leftParentheses = /^\s*\(\s+/g;
-var rightParentheses = /^\s+\)/g;
+var rightParentheses = /^\s*\)/g;
 
 var firstRightParentheses = /\)/g;
 
@@ -104,6 +109,7 @@ var parseArguments = function(codeString) {
 // 没有标识结束
 var expression = function(codeString, node) {
 
+    console.log('expression', codeString)
     if(codeString.length < 1) return '';
 
     leftParentheses.lastIndex = 0;
@@ -113,9 +119,13 @@ var expression = function(codeString, node) {
         rightParentheses.lastIndex = 0;
 
         rightParentheses.exec(codeString);
+
         if(rightParentheses.lastIndex > 0) {
             node.rightParentheses = true;
+            console.log(true)
             return expression(codeString.substr(rightParentheses.lastIndex, codeString.length), node.getParent())
+        } else { //结束
+            return ;
         }
     };
 
@@ -131,25 +141,30 @@ var expression = function(codeString, node) {
             case '+' :
                 var nNode = new Node();
                 nNode.setType("+");
-                node.setParent(nNode);
+                nNode.setParent(node);
                 tokenReg.lastIndex = 0;
                 tokenReg.exec(codeString)
-                var leftSymbol = codeString.substr(tokenReg.index, tokenReg.lastIndex);
-                codeString = codeString.substr(tokenReg.lastIndex, codeString.length);
-                nNode.addLeft(new Node().setType('symbol').setValue(leftSymbol));
+                leftParentheses.lastIndex = 0
 
-                leftParentheses.lastIndex = 0;
-                if(leftParentheses.exec(codeString)) {
+                if(tokenReg.lastIndex > 0) {
+                    var symbol = codeString.substr(tokenReg.index, tokenReg.lastIndex);
+                    codeString = codeString.substr(tokenReg.lastIndex, codeString.length);
+                    nNode.addLeft(new Node().setType('symbol').setValue(symbol));
+
+                    tokenReg.lastIndex = 0
+                    if(tokenReg.exec(codeString)) {
+                        var sym = codeString.substr(tokenReg.index, tokenReg.lastIndex);
+                        codeString = codeString.substr(tokenReg.lastIndex, codeString.length)
+                        nNode.addRight(new Node().setType('symbol').setValue(sym));
+                    }
+
+                    return expression(codeString, nNode);
+                } else if(leftParentheses.exec(codeString)) {
                     return expression(codeString, nNode);
                 } else {
-                    tokenReg.lastIndex = 0;
-                    if(tokenReg.exec(codeString)) {
-                        nNode.addRight(new Node().setType('symbol').setValue(codeString.substr(tokenReg.index, tokenReg.lastIndex)));
-                        return expression(codeString.substr(tokenReg.lastIndex, codeString.length), nNode);
-                    } else {
-                        throw new Error('语法错误!');
-                    }
+                    throw new Error('语法错误!')
                 }
+                break;
         }
     }
 
@@ -258,6 +273,9 @@ var parse = function (codeString, parent) {
                 codeString = codeString.substr(advance, codeString.length);
                 console.log(codeString)
 
+                expression(codeString, codeNode)
+                console.log(codeNode);
+
             }
         }
 
@@ -268,4 +286,5 @@ var parse = function (codeString, parent) {
 var root = new Node();
 var ss = "( * 4 ( * 2 3 ) )"
 var fn = "( define ( double x ) ( + x ( + x x ) ) )"
-parse(fn, root)
+var ff = "( define ( double x ) ( + ( + x x ) ( + x x ) ) )"
+parse(ff, root)
