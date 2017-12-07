@@ -287,4 +287,10 @@ var root = new Node();
 var ss = "( * 4 ( * 2 3 ) )"
 var fn = "( define ( double x ) ( + x ( + x x ) ) )"
 var ff = "( define ( double x ) ( + ( + x x ) ( + x x ) ) )"
+var defVar = "( define n 0)"
+var whileEx = "( while (< n 15)" +
+                      "(do (set! n (+ n 1))" +
+                           "(print (n)))"
+
+
 parse(ff, root)
