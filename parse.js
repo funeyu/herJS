@@ -201,6 +201,15 @@ var parseDefination = function(codeString, codeNode) {
     return advance;
 }
 
+var whileContion = function(codeString, node) {
+
+
+}
+
+var parseWhile = function(codeString, codeNode) {
+
+}
+
 var parse = function (codeString, parent) {
 
     if(codeString.length <= 0) {
@@ -277,6 +286,10 @@ var parse = function (codeString, parent) {
                 console.log(codeNode);
 
             }
+
+            else if(info.type == 'while') {
+                parseWhile(codeString.trim(), )
+            }
         }
 
     }
@@ -293,4 +306,4 @@ var whileEx = "( while (< n 15)" +
                            "(print (n)))"
 
 
-parse(ff, root)
+parse(whileEx, root)
