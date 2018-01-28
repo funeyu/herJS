@@ -287,4 +287,5 @@ var root = new Node();
 var ss = "( * 4 ( * 2 3 ) )"
 var fn = "( define ( double x ) ( + x ( + x x ) ) )"
 var ff = "( define ( double x ) ( + ( + x x ) ( + x x ) ) )"
-parse(ff, root)
+var whiles = ""
+parse(fn, root)
