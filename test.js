@@ -6,5 +6,8 @@ console.log(
 )
 
 const find = require('./p').find
-let re = find('aacacd', 'ab|cd*')
+let re = find('aacacdddd', 'ab|cd*')
 console.log(re)
+
+let nested = find('(abc)*abd', 'abd')
+let nested1 = find('(abc)*abd', 'abcabcabd')

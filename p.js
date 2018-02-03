@@ -1,4 +1,5 @@
 // re: 'ab|cd*', input: 'aacacd'
+// re: '(aba*)*m', input: 'ababam'
 const find = exports.find = function(input, re) {
     let reState = parse(re)
     let textLength = input.length
@@ -83,7 +84,7 @@ const parse = function(inputRE) {
     if(nextChar === 124) {// |
         return new State('Or', [inputRE[0], inputRE[2]], parse(inputRE.substr(3, inputRE.length)))
     }
-    if(nextChar === 42) {// ×
+    if(nextChar === 42) {// *
         return new State('Some', inputRE[0], parse(inputRE.substr(2, inputRE.length)))
     }
 }
