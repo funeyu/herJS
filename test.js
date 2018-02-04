@@ -9,5 +9,5 @@ const find = require('./p').find
 let re = find('aacacdddd', 'ab|cd*')
 console.log(re)
 
-let nested = find('(abc)*abd', 'abd')
-let nested1 = find('(abc)*abd', 'abcabcabd')
+// let nested = find('(abc)*abd', 'abd')
+// let nested1 = find('(abc)*abd', 'abcabcabd')

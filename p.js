@@ -70,21 +70,34 @@ const parse = function(inputRE) {
         return Matched
 
     let thisChar = inputRE.charCodeAt(0)
+    if(thisChar === 40) { // (
+        let nextInput = inputRE.substr(1, inputRE.length)
+        return new State('Nested', parse(nextInput), parse(nextInput))
+    }
+
     let nextChar = inputRE.charCodeAt(1)
+    if(nextChar === 41) { // )
+        let letter = inputRE[0]
+        let nextInput = inputRE.substr(2, inputRE.length)
+        return new State('Letter', letter, Matched)
+    }
     if(!isLetter(thisChar))
         throw new Error('except a letter but not')
 
     if(isLetter(nextChar)) {
-        return new State('Letter', inputRE[0], parse(inputRE.substr(1, inputRE.length)))
-    }
-
-    if(nextChar === 40) { // (
-
+        let letter = inputRE[0]
+        let nextInput = inputRE.substr(1, inputRE.length)
+        return new State('Letter', letter, parse(nextInput))
     }
     if(nextChar === 124) {// |
-        return new State('Or', [inputRE[0], inputRE[2]], parse(inputRE.substr(3, inputRE.length)))
+        let left = inputRE[0]
+        let right = inputRE[2]
+        let nextInput = inputRE.substr(3, inputRE.length)
+        return new State('Or', [left, right], parse(nextInput))
     }
     if(nextChar === 42) {// *
-        return new State('Some', inputRE[0], parse(inputRE.substr(2, inputRE.length)))
+        let some = inputRE[0]
+        let nextInput = inputRE.substr(2, inputRE.length)
+        return new State('Some', inputRE[0], parse(nextInput))
     }
 }
